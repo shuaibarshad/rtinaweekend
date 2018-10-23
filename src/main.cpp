@@ -5,6 +5,9 @@
 #include "camera.h"
 #include "material.h"
 
+#ifdef WIN32
+#define MAXFLOAT FLT_MAX
+#endif
 
 vec3 color(const ray& r, hitable* world, int depth) {
     hit_record rec;
