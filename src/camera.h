@@ -1,6 +1,11 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif
+
 #include "ray.h"
 
 vec3 random_in_unit_disk() {

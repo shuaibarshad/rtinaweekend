@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <iostream>
 
+#ifdef WIN32
+#define drand48() ((double)rand() / (RAND_MAX + 1.0))
+#endif
+
 class vec3 {
 public:
     vec3() {}
