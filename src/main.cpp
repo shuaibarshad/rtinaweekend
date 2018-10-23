@@ -5,7 +5,7 @@
 #include "camera.h"
 #include "material.h"
 
-#ifdef WIN32
+#if defined(WIN32) or defined(LINUX)
 #define MAXFLOAT FLT_MAX
 #endif
 
@@ -61,9 +61,9 @@ hitable* random_scene() {
 
 int main(int argc, char* argv[])
 {
-    int nx = 200;
-    int ny = 100;
-    int ns = 10;
+    int nx = 800;
+    int ny = 400;
+    int ns = 128;
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
@@ -77,13 +77,13 @@ int main(int argc, char* argv[])
     hitable* world = random_scene();
     
     //vec3 lookfrom(3,3,2);
-    vec3 lookfrom(8,1.5,2);
+    vec3 lookfrom(8,1.5,4);
     //vec3 lookat(0,0,-1);
     vec3 lookat(0,0,0);
     //float dist_to_focus = (lookfrom - lookat).length();
     //float aperture = 2.0;
     float dist_to_focus = 8*(lookfrom - lookat).length();
-    float aperture = 0.01;
+    float aperture = 0.1;
     camera cam(lookfrom, lookat, vec3(0,1,0), 45, float(nx)/float(ny), aperture, dist_to_focus);
 
     //float R = cos(M_PI/4);
