@@ -5,10 +5,14 @@
 #include "float.h"
 #include "camera.h"
 #include "material.h"
+#include "bvh_node.h"
 
 #if defined(WIN32) or defined(LINUX)
 #define MAXFLOAT FLT_MAX
 #endif
+
+unsigned long long ray_prim_intersect_count = 0;
+unsigned long long ray_node_intersect_count = 0; 
 
 vec3 color(const ray& r, hitable* world, int depth) {
     hit_record rec;
@@ -93,8 +97,8 @@ hitable* random_scene_moving_spheres() {
 
 int main(int argc, char* argv[])
 {
-    int nx = 200;
-    int ny = 100;
+    int nx = 800;
+    int ny = 400;
     int ns = 100;
 
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
@@ -113,7 +117,10 @@ int main(int argc, char* argv[])
     camera cam(lookfrom, lookat, vec3(0,1,0), 45, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
 #endif
     
+    float t0 = 0.0;
+    float t1 = 1.0;
     hitable* world = random_scene();
+    bvh_node* world_bvh = new bvh_node(((hitable_list*)world)->list, ((hitable_list*)world)->list_size, t0,  t1);
     //hitable* world = random_scene_moving_spheres();
     //vec3 lookfrom(8,1.5,4);
     vec3 lookfrom(13,2,3);
@@ -121,7 +128,7 @@ int main(int argc, char* argv[])
     float dist_to_focus = 10;
     //float aperture = 0.1;
     float aperture = 0.0;
-    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, 0.0, 1.0);
+    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
 
     //float R = cos(M_PI/4);
     //hitable* list[2];
@@ -138,7 +145,8 @@ int main(int argc, char* argv[])
                 float v = float(j + drand48()) / float(ny);
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
-                col += color(r, world, 0);
+                //col += color(r, world, 0);
+                col += color(r, world_bvh, 0);
             }
             col /= float(ns);
             col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
@@ -149,5 +157,8 @@ int main(int argc, char* argv[])
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
     }
+
+    std::cout << "ray-prim tests: " << ray_prim_intersect_count << "\n";
+    std::cout << "ray-node tests: " << ray_node_intersect_count << "\n";
 }
 

@@ -3,6 +3,8 @@
 
 #include "hitable.h"
 
+extern unsigned long long ray_prim_intersect_count;
+
 class sphere : public hitable {
 public:
     sphere() {}
@@ -17,6 +19,7 @@ public:
 };
 
 bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const {
+    ray_prim_intersect_count++;
     vec3 oc = r.origin() - center;
     float a = dot(r.direction(), r.direction());
     float b = dot(oc, r.direction());
