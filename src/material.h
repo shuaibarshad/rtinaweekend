@@ -1,6 +1,8 @@
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
 
+#include "texture.h"
+
 
 vec3 random_in_unit_sphere() {
     vec3 p;
@@ -18,15 +20,15 @@ public:
 
 class lambertian : public material {
 public:
-    lambertian(const vec3& a) : albedo(a) {}
+    lambertian(texture* a) : albedo(a) {}
     virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const {
         vec3 target = rec.p + rec.normal + random_in_unit_sphere();
         scattered = ray(rec.p, target-rec.p, r_in.time());
-        attenuation = albedo;
+        attenuation = albedo->value(0, 0, rec.p);
         return true;
     }
 
-    vec3 albedo;
+    texture* albedo;
 };
 
 
@@ -48,16 +50,16 @@ bool refract(const vec3& v, const vec3& n, float ni_over_nt, vec3& refracted) {
 
 class metal : public material {
 public:
-    metal(const vec3& a) : albedo(a), fuzz(0) { }
-    metal(const vec3& a, float f) : albedo(a) { if (f < 1) fuzz = f; else fuzz = 1; }
+    metal(texture* a) : albedo(a), fuzz(0) { }
+    metal(texture* a, float f) : albedo(a) { if (f < 1) fuzz = f; else fuzz = 1; }
     virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered) const {
         vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
         scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere(), r_in.time());
-        attenuation = albedo;
+        attenuation = albedo->value(0, 0, rec.p);
         return (dot(scattered.direction(), rec.normal) > 0);
     }
 
-    vec3 albedo;
+    texture* albedo;
     float fuzz;
 };
 

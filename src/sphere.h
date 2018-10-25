@@ -5,6 +5,13 @@
 
 extern unsigned long long ray_prim_intersect_count;
 
+void get_sphere_uv(const vec3& p, float& u, float& v) {
+    float phi = atan2(p.z(), p.x());
+    float theta = asin(p.y());
+    u = 1-(phi + M_PI) / (2*M_PI);
+    v = (theta + M_PI/2) / M_PI;
+}
+
 class sphere : public hitable {
 public:
     sphere() {}
@@ -26,6 +33,7 @@ bool sphere::hit(const ray& r, float t_min, float t_max, hit_record& rec) const 
     float c = dot(oc, oc) - radius*radius;
     float discriminant = b*b - a*c;
     if (discriminant > 0) {
+        get_sphere_uv((rec.p-center)/radius, rec.u, rec.v);
         float temp = (-b - sqrt(b*b - a*c))/a;
         if (temp < t_max && temp > t_min) {
             rec.t = temp;
