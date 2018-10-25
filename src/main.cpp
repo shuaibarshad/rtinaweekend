@@ -11,6 +11,9 @@
 #define MAXFLOAT FLT_MAX
 #endif
 
+#define NUM_BOUNCE 5
+#define USE_BVH
+
 unsigned long long ray_prim_intersect_count = 0;
 unsigned long long ray_node_intersect_count = 0; 
 
@@ -19,7 +22,7 @@ vec3 color(const ray& r, hitable* world, int depth) {
     if (world->hit(r, 0.001, MAXFLOAT, rec)) {
         ray scattered;
         vec3 attenuation;
-        if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+        if (depth < NUM_BOUNCE && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
             return attenuation*color(scattered, world, depth+1);
         }
         else {
@@ -120,7 +123,9 @@ int main(int argc, char* argv[])
     float t0 = 0.0;
     float t1 = 1.0;
     hitable* world = random_scene();
+#ifdef USE_BVH
     bvh_node* world_bvh = new bvh_node(((hitable_list*)world)->list, ((hitable_list*)world)->list_size, t0,  t1);
+#endif
     //hitable* world = random_scene_moving_spheres();
     //vec3 lookfrom(8,1.5,4);
     vec3 lookfrom(13,2,3);
@@ -145,8 +150,11 @@ int main(int argc, char* argv[])
                 float v = float(j + drand48()) / float(ny);
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
-                //col += color(r, world, 0);
-                col += color(r, world_bvh, 0);
+#ifdef USE_BVH
+				col += color(r, world_bvh, 0);
+#else
+                col += color(r, world, 0);
+#endif
             }
             col /= float(ns);
             col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
@@ -158,7 +166,7 @@ int main(int argc, char* argv[])
         }
     }
 
-    std::cout << "ray-prim tests: " << ray_prim_intersect_count << "\n";
-    std::cout << "ray-node tests: " << ray_node_intersect_count << "\n";
+    std::cerr << "ray-prim tests: " << ray_prim_intersect_count << "\n";
+    std::cerr << "ray-node tests: " << ray_node_intersect_count << "\n";
 }
 
