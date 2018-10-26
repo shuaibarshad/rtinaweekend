@@ -6,5 +6,6 @@ if(UNIX AND NOT APPLE)
     add_definitions(-DLINUX)
 endif ()
 
+include_directories(external/stb)
 add_subdirectory(src)
 

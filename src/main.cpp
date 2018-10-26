@@ -119,10 +119,14 @@ hitable* two_perlin_spheres() {
 
 hitable* earth() {
     int nx, ny, nn;
-    unsigned char* tex_data = stbi_load("earthmap.png", &nx, &ny, &nn, 0);
+    unsigned char* tex_data = stbi_load("earthmap.jpg", &nx, &ny, &nn, 0);
+	if (!tex_data) {
+		std::cerr << "Couldn't load image texture";
+		exit(-1);
+	}
     material* mat = new lambertian((texture*)new image_texture(tex_data, nx, ny));
     hitable** list = new hitable*[1];
-    list[0] = new sphere(vec3(0,3,0), 3, mat);
+    list[0] = new sphere(vec3(0,0,0), 3, mat);
     return new hitable_list(list, 1);
 }
 
@@ -166,7 +170,8 @@ int main(int argc, char* argv[])
     float dist_to_focus = 10;
     //float aperture = 0.1;
     float aperture = 0.0;
-    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
+    //camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
+    camera cam(lookfrom, lookat, vec3(0,1,0), 45, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
 
     //float R = cos(M_PI/4);
     //hitable* list[2];
