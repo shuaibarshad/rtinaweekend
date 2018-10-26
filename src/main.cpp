@@ -8,6 +8,7 @@
 #include "material.h"
 #include "bvh_node.h"
 #include "texture.h"
+#include "xy_rect.h"
 
 #if defined(WIN32) or defined(LINUX)
 #define MAXFLOAT FLT_MAX
@@ -26,6 +27,7 @@ vec3 color(const ray& r, hitable* world, int depth) {
     if (world->hit(r, 0.001, MAXFLOAT, rec)) {
         ray scattered;
         vec3 attenuation;
+        vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
         if (depth < NUM_BOUNCE && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
             return attenuation*color(scattered, world, depth+1);
         }
@@ -33,11 +35,13 @@ vec3 color(const ray& r, hitable* world, int depth) {
             return vec3(0, 0, 0);
         }
     }
-    else {
-        vec3 unit_direction = unit_vector(r.direction());
-        float t = 0.5*(unit_direction.y() + 1.0);
-        return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
-    }
+    // Commenting out to test rectangle lights
+    return vec3(0, 0, 0);
+    //else {
+    //    vec3 unit_direction = unit_vector(r.direction());
+    //    float t = 0.5*(unit_direction.y() + 1.0);
+    //    return (1.0-t)*vec3(1.0, 1.0, 1.0) + t*vec3(0.5, 0.7, 1.0);
+    //}
 }
 
 hitable* random_scene() {
@@ -130,6 +134,16 @@ hitable* earth() {
     return new hitable_list(list, 1);
 }
 
+hitable* simple_light() {
+    texture* pertext = new noise_texture(4);
+    hitable** list = new hitable*[4];
+    list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(pertext));
+    list[1] = new sphere(vec3(0, 2, 0), 2, new lambertian(pertext));
+    list[2] = new sphere(vec3(0, 7, 0), 2, new diffuse_light(new constant_texture(vec3(4,4,4))));
+    list[3] = new xy_rect(3, 5, 1, 3, -2, new diffuse_light(new constant_texture(vec3(4,4,4))));
+    return new hitable_list(list, 4);
+}
+
 int main(int argc, char* argv[])
 {
     int nx = 800;
@@ -170,8 +184,9 @@ int main(int argc, char* argv[])
     float dist_to_focus = 10;
     //float aperture = 0.1;
     float aperture = 0.0;
-    //camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
-    camera cam(lookfrom, lookat, vec3(0,1,0), 45, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
+    camera cam(lookfrom, lookat, vec3(0,1,0), 20, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
+    //// Camera location for the earth sphere
+    //camera cam(lookfrom, lookat, vec3(0,1,0), 45, float(nx)/float(ny), aperture, dist_to_focus, t0, t1);
 
     //float R = cos(M_PI/4);
     //hitable* list[2];
